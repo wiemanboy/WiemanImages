@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -13,9 +12,9 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
+	exception := godotenv.Load()
+	if exception != nil {
+		print("Failed loading from .env file")
 	}
 
 	appConfig := config.LoadConfig()
