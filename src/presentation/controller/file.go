@@ -8,6 +8,6 @@ import (
 func ApplyFileRoutes(router *gin.RouterGroup, controller *FileController) {
 	posts := router.Group("/files")
 	{
-		posts.GET("/:objectKey", controller.Read)
+		posts.GET("/*objectKey", controller.Read)
 	}
 }
