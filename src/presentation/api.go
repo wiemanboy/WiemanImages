@@ -1,7 +1,8 @@
 package presentation
 
 import (
-	"WiemanCDN/src/presentation/controller"
+	"WiemanCDN/src/presentation/controller/auth"
+	"WiemanCDN/src/presentation/controller/files"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,10 +12,11 @@ func ping(context *gin.Context) {
 	})
 }
 
-func ApplyRoutes(router *gin.Engine, fileController *controller.FileController) {
+func ApplyRoutes(router *gin.Engine, fileController *files.FileController, authController *auth.AuthController) {
 	api := router.Group("/api")
 	{
 		api.GET("/ping", ping)
-		controller.ApplyFileRoutes(api, fileController)
+		files.ApplyRoutes(api, fileController)
+		auth.ApplyRoutes(api, authController)
 	}
 }

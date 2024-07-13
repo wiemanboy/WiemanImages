@@ -1,11 +1,11 @@
-package controller
+package files
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
-// ApplyFileRoutes applies router to the gin Engine
-func ApplyFileRoutes(router *gin.RouterGroup, controller *FileController) {
+// ApplyRoutes applies router to the gin Engine
+func ApplyRoutes(router *gin.RouterGroup, controller *FileController) {
 	files := router.Group("/files")
 	{
 		files.GET("/*objectKey", controller.Read)
