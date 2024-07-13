@@ -12,16 +12,19 @@ import (
 
 type FileService struct {
 	fileRepository data.FileRepository
+	AuthService    AuthService
 }
 
-func NewFileService(fileRepository data.FileRepository) FileService {
+func NewFileService(fileRepository data.FileRepository, authService AuthService) FileService {
 	return FileService{
 		fileRepository: fileRepository,
+		AuthService:    authService,
 	}
 }
 
-func (service *FileService) GetFile(objectKey string, imageSize string) ([]byte, error) {
-	imageBytes, err := service.fileRepository.GetFile(objectKey, false)
+func (service *FileService) GetFile(objectKey string, imageSize string, token string) ([]byte, error) {
+	access := service.AuthService.Check(token)
+	imageBytes, err := service.fileRepository.GetFile(objectKey, access)
 	if err != nil {
 		return nil, err
 	}

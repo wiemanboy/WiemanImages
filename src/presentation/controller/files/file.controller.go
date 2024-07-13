@@ -20,8 +20,14 @@ func NewFileController(fileService service.FileService) *FileController {
 func (controller *FileController) Read(context *gin.Context) {
 	objectKey := context.Param("objectKey")
 	imageSize := context.Query("size")
+	cookieToken, _ := context.Request.Cookie("token")
 
-	fileContent, err := controller.fileService.GetFile(objectKey, imageSize)
+	token := ""
+	if cookieToken != nil {
+		token = cookieToken.Value
+	}
+
+	fileContent, err := controller.fileService.GetFile(objectKey, imageSize, token)
 
 	if err != nil {
 		context.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
@@ -30,7 +36,6 @@ func (controller *FileController) Read(context *gin.Context) {
 	context.Data(http.StatusOK, "image/webp", fileContent)
 }
 
-// Create TODO: add auth
 func (controller *FileController) Create(context *gin.Context) {
 	formFile, fileHeader, err := context.Request.FormFile("image")
 	if err != nil {

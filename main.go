@@ -6,6 +6,7 @@ import (
 	"WiemanCDN/src/presentation"
 	"WiemanCDN/src/presentation/controller/auth"
 	"WiemanCDN/src/presentation/controller/files"
+	"WiemanCDN/src/presentation/middleware"
 	"WiemanCDN/src/s3"
 	"WiemanCDN/src/service"
 	"github.com/gin-gonic/gin"
@@ -22,14 +23,15 @@ func main() {
 
 	s3Client := s3.NewS3Client(&appConfig.Region, &appConfig.S3Endpoint, appConfig.AccessKeyID, appConfig.SecretAccessKey)
 
-	fileRepository := data.NewS3Repository(s3Client, appConfig.BucketName)
-	fileService := service.NewFileService(fileRepository)
-	fileController := files.NewFileController(fileService)
-
 	authService := service.NewAuthService(appConfig.JWTSecret, appConfig.JWTExpirationTime, appConfig.AdminUsername, appConfig.AdminPassword)
 	authController := auth.NewController(authService, appConfig.JWTExpirationTime)
+	authMiddleware := middleware.NewAuthorizedMiddleware(&authService)
+
+	fileRepository := data.NewS3Repository(s3Client, appConfig.BucketName)
+	fileService := service.NewFileService(fileRepository, authService)
+	fileController := files.NewFileController(fileService)
 
 	app := gin.Default()
-	presentation.ApplyRoutes(app, fileController, authController)
+	presentation.ApplyRoutes(app, fileController, authController, authMiddleware)
 	app.Run(":" + appConfig.Port)
 }

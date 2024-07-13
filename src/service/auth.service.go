@@ -53,11 +53,12 @@ func checkToken(token string, secret string) bool {
 	}
 
 	expiration := int64(claims["expires"].(float64))
-	return time.Now().Unix() < expiration
+	now := time.Now().Unix()
+	return now < expiration
 }
 
 func generateToken(secret string, expiration int) (string, error) {
-	date := time.Now().Add(time.Duration(expiration))
+	date := time.Now().Add(time.Millisecond * time.Duration(expiration))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"expires": date.Unix(),
