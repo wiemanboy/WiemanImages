@@ -9,6 +9,7 @@ import (
 )
 
 type FileRepository interface {
+	ListFiles(objectKey string, lockAccess bool) ([]string, error)
 	GetFile(objectKey string, lockAccess bool) ([]byte, error)
 	SaveFile(filename string, data []byte, locked string) error
 }
@@ -20,6 +21,19 @@ type S3Repository struct {
 
 func NewS3Repository(s3Client *s3.S3, bucketName string) FileRepository {
 	return &S3Repository{s3Client: s3Client, bucketName: bucketName}
+}
+
+func (repo *S3Repository) ListFiles(objectKey string, lockAccess bool) ([]string, error) {
+	output, _ := repo.s3Client.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket: aws.String(repo.bucketName),
+		Prefix: aws.String(objectKey[1:]),
+	})
+
+	var files []string
+	for _, item := range output.Contents {
+		files = append(files, *item.Key)
+	}
+	return files, nil
 }
 
 func (repo *S3Repository) GetFile(objectKey string, lockAccess bool) ([]byte, error) {
