@@ -1,15 +1,16 @@
 package data
 
 import (
-	"io/ioutil"
-	"os"
-
+	"bytes"
+	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"io"
 )
 
 type FileRepository interface {
-	GetFile(objectKey string) ([]byte, error)
+	GetFile(objectKey string, lockAccess bool) ([]byte, error)
+	SaveFile(filename string, data []byte, locked string) error
 }
 
 type S3Repository struct {
@@ -21,35 +22,39 @@ func NewS3Repository(s3Client *s3.S3, bucketName string) FileRepository {
 	return &S3Repository{s3Client: s3Client, bucketName: bucketName}
 }
 
-func (repo *S3Repository) GetFile(objectKey string) ([]byte, error) {
-	objectOutput, exception := repo.s3Client.GetObject(&s3.GetObjectInput{
+func (repo *S3Repository) GetFile(objectKey string, lockAccess bool) ([]byte, error) {
+	objectOutput, err := repo.s3Client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(repo.bucketName),
 		Key:    aws.String(objectKey),
 	})
-	if exception != nil {
-		return nil, exception
+	if err != nil {
+		return nil, err
 	}
+
+	locked := objectOutput.Metadata["Locked"]
+	if !lockAccess && locked != nil && *locked == "true" {
+		return nil, errors.New("file is locked")
+	}
+
 	defer objectOutput.Body.Close()
 
-	bodyBytes, exception := ioutil.ReadAll(objectOutput.Body)
-	if exception != nil {
-		return nil, exception
+	bodyBytes, err := io.ReadAll(objectOutput.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	return bodyBytes, nil
 }
 
-func SaveToFile(filename string, data []byte) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.Write(data)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (repo *S3Repository) SaveFile(filename string, data []byte, locked string) error {
+	_, err := repo.s3Client.PutObject(&s3.PutObjectInput{
+		Bucket: &repo.bucketName,
+		Key:    &filename,
+		Body:   aws.ReadSeekCloser(bytes.NewReader(data)),
+		Metadata: map[string]*string{
+			"locked": aws.String(locked),
+		},
+		ContentType: aws.String("image/webp"),
+	})
+	return err
 }
