@@ -22,19 +22,26 @@ func NewFileService(fileRepository data.FileRepository, authService AuthService)
 	}
 }
 
-func (service *FileService) GetFile(objectKey string, imageSize string, token string) ([]byte, error) {
+func (service *FileService) GetFile(objectKey string, imageSize string, token string) ([]string, []byte, error) {
 	access := service.AuthService.Check(token)
+
+	fileList, _ := service.fileRepository.ListFiles(objectKey, access)
+	if len(fileList) > 1 {
+		return fileList, nil, nil
+	}
 	imageBytes, err := service.fileRepository.GetFile(objectKey, access)
+
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	inputImage, imageFormat, err := readBytes(imageBytes)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return encodeImage(resizeImage(inputImage, imageSize), imageFormat)
+	encodedImage, err := encodeImage(resizeImage(inputImage, imageSize), imageFormat)
+	return fileList, encodedImage, err
 }
 
 func (service *FileService) CreateFile(objectKey string, fileContent []byte, locked string) error {

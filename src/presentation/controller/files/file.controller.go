@@ -27,12 +27,17 @@ func (controller *FileController) Read(context *gin.Context) {
 		token = cookieToken.Value
 	}
 
-	fileContent, err := controller.fileService.GetFile(objectKey, imageSize, token)
+	fileList, fileContent, err := controller.fileService.GetFile(objectKey, imageSize, token)
 
 	if err != nil {
 		context.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
 		return
 	}
+	if len(fileList) > 1 {
+		context.JSON(http.StatusOK, gin.H{"files": fileList})
+		return
+	}
+
 	context.Data(http.StatusOK, "image/webp", fileContent)
 }
 
