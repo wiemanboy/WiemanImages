@@ -25,5 +25,5 @@ func (controller *FileController) Read(context *gin.Context) {
 		return
 	}
 
-	context.Data(http.StatusOK, "application/octet-stream", fileContent)
+	context.Data(http.StatusOK, "image/webp", fileContent)
 }
