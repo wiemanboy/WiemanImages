@@ -22,7 +22,7 @@ func NewFileService(fileRepository data.FileRepository) FileService {
 }
 
 func (service *FileService) GetFile(objectKey string, imageSize string) ([]byte, error) {
-	imageBytes, err := service.fileRepository.GetFile(objectKey)
+	imageBytes, err := service.fileRepository.GetFile(objectKey, false)
 	if err != nil {
 		return nil, err
 	}
@@ -66,4 +66,8 @@ func (service *FileService) GetFile(objectKey string, imageSize string) ([]byte,
 	}
 
 	return outputBuffer.Bytes(), nil
+}
+
+func (service *FileService) CreateFile(objectKey string, fileContent []byte, locked string) error {
+	return service.fileRepository.SaveFile(objectKey, fileContent, locked)
 }

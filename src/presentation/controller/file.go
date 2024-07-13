@@ -6,8 +6,9 @@ import (
 
 // ApplyFileRoutes applies router to the gin Engine
 func ApplyFileRoutes(router *gin.RouterGroup, controller *FileController) {
-	posts := router.Group("/files")
+	files := router.Group("/files")
 	{
-		posts.GET("/*objectKey", controller.Read)
+		files.GET("/*objectKey", controller.Read)
+		files.POST("/", controller.Create)
 	}
 }
