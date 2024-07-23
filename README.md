@@ -1,6 +1,6 @@
-# WiemanCDN
+# WiemanImages
 
-This is a simple REST API server that serves as a CDN for my websites, it is used to store and serve files with image optimization in mind.
+This is a simple REST API server that serves to supply images to my websites, it is used to store and serve files with image optimization in mind.
 
 It is written in [Go](https://go.dev/) using the [Gin framework](https://gin-gonic.com/docs/).
 
