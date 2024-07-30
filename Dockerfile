@@ -14,6 +14,7 @@ FROM golang:alpine
 
 COPY --from=builder /build /build
 COPY read_secrets.sh /read_secrets.sh
+RUN chmod +x /read_secrets.sh
 
 ENV PORT=8000
 
