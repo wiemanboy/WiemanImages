@@ -11,7 +11,7 @@ services:
       - ./dev/minio/data:/data
     command: server /data --console-address ":9001"
 
-  wiemancdn:
+  wiemanimages:
     build:
       context: .
       dockerfile: Dockerfile
