@@ -28,7 +28,7 @@ func main() {
 	authMiddleware := middleware.NewAuthorizedMiddleware(&authService)
 
 	fileRepository := data.NewS3Repository(s3Client, appConfig.BucketName)
-	fileService := service.NewFileService(fileRepository, authService)
+	fileService := service.NewFileService(fileRepository)
 	fileController := files.NewFileController(fileService)
 
 	app := gin.Default()

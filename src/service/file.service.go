@@ -12,24 +12,20 @@ import (
 
 type FileService struct {
 	fileRepository data.FileRepository
-	AuthService    AuthService
 }
 
-func NewFileService(fileRepository data.FileRepository, authService AuthService) FileService {
+func NewFileService(fileRepository data.FileRepository) FileService {
 	return FileService{
 		fileRepository: fileRepository,
-		AuthService:    authService,
 	}
 }
 
-func (service *FileService) GetFile(objectKey string, imageSize string, token string) ([]string, []byte, error) {
-	access := service.AuthService.Check(token)
-
-	fileList, _ := service.fileRepository.ListFiles(objectKey, access)
+func (service *FileService) GetFile(objectKey string, imageSize string) ([]string, []byte, error) {
+	fileList, _ := service.fileRepository.ListFiles(objectKey)
 	if len(fileList) > 1 {
 		return fileList, nil, nil
 	}
-	imageBytes, err := service.fileRepository.GetFile(objectKey, access)
+	imageBytes, err := service.fileRepository.GetFile(objectKey)
 
 	if err != nil {
 		return nil, nil, err
@@ -44,8 +40,8 @@ func (service *FileService) GetFile(objectKey string, imageSize string, token st
 	return fileList, encodedImage, err
 }
 
-func (service *FileService) CreateFile(objectKey string, fileContent []byte, locked string) error {
-	return service.fileRepository.SaveFile(objectKey, fileContent, locked)
+func (service *FileService) CreateFile(objectKey string, fileContent []byte) error {
+	return service.fileRepository.SaveFile(objectKey, fileContent)
 }
 
 func readBytes(imageBytes []byte) (image.Image, string, error) {
