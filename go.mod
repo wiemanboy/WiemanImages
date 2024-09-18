@@ -1,4 +1,4 @@
-module WiemanCDN
+module WiemanImages
 
 go 1.22.0
 

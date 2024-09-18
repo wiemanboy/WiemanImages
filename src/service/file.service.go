@@ -1,7 +1,7 @@
 package service
 
 import (
-	"WiemanCDN/src/data"
+	"WiemanImages/src/data"
 	"bytes"
 	"fmt"
 	"github.com/nfnt/resize"

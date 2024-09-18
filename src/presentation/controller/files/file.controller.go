@@ -1,7 +1,7 @@
 package files
 
 import (
-	"WiemanCDN/src/service"
+	"WiemanImages/src/service"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"

@@ -1,7 +1,7 @@
 package files
 
 import (
-	"WiemanCDN/src/presentation/middleware"
+	"WiemanImages/src/presentation/middleware"
 	"github.com/gin-gonic/gin"
 )
 

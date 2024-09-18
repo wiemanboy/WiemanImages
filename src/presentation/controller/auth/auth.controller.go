@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"WiemanCDN/src/service"
+	"WiemanImages/src/service"
 	"github.com/gin-gonic/gin"
 )
 
