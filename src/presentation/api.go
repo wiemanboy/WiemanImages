@@ -1,9 +1,9 @@
 package presentation
 
 import (
-	"WiemanCDN/src/presentation/controller/auth"
-	"WiemanCDN/src/presentation/controller/files"
-	"WiemanCDN/src/presentation/middleware"
+	"WiemanImages/src/presentation/controller/auth"
+	"WiemanImages/src/presentation/controller/files"
+	"WiemanImages/src/presentation/middleware"
 	"github.com/gin-gonic/gin"
 )
 

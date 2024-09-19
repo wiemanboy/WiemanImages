@@ -1,14 +1,14 @@
 package main
 
 import (
-	"WiemanCDN/config"
-	"WiemanCDN/src/data"
-	"WiemanCDN/src/presentation"
-	"WiemanCDN/src/presentation/controller/auth"
-	"WiemanCDN/src/presentation/controller/files"
-	"WiemanCDN/src/presentation/middleware"
-	"WiemanCDN/src/s3"
-	"WiemanCDN/src/service"
+	"WiemanImages/config"
+	"WiemanImages/src/data"
+	"WiemanImages/src/presentation"
+	"WiemanImages/src/presentation/controller/auth"
+	"WiemanImages/src/presentation/controller/files"
+	"WiemanImages/src/presentation/middleware"
+	"WiemanImages/src/s3"
+	"WiemanImages/src/service"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -28,7 +28,7 @@ func main() {
 	authMiddleware := middleware.NewAuthorizedMiddleware(&authService)
 
 	fileRepository := data.NewS3Repository(s3Client, appConfig.BucketName)
-	fileService := service.NewFileService(fileRepository, authService)
+	fileService := service.NewFileService(fileRepository)
 	fileController := files.NewFileController(fileService)
 
 	app := gin.Default()

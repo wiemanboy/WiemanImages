@@ -1,0 +1,6 @@
+with-expecter: True
+all: True
+packages:
+  WiemanImages:
+    config:
+      recursive: True

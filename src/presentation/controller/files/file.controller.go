@@ -1,7 +1,7 @@
 package files
 
 import (
-	"WiemanCDN/src/service"
+	"WiemanImages/src/service"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -20,14 +20,8 @@ func NewFileController(fileService service.FileService) *FileController {
 func (controller *FileController) Read(context *gin.Context) {
 	objectKey := context.Param("objectKey")
 	imageSize := context.Query("size")
-	cookieToken, _ := context.Request.Cookie("token")
 
-	token := ""
-	if cookieToken != nil {
-		token = cookieToken.Value
-	}
-
-	fileList, fileContent, err := controller.fileService.GetFile(objectKey, imageSize, token)
+	fileList, fileContent, err := controller.fileService.GetFile(objectKey, imageSize)
 
 	if err != nil {
 		context.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
@@ -52,7 +46,7 @@ func (controller *FileController) Create(context *gin.Context) {
 	locked := context.PostForm("locked")
 	fileBytes, _ := io.ReadAll(formFile)
 
-	err = controller.fileService.CreateFile(key, fileBytes, locked)
+	err = controller.fileService.CreateFile(key, fileBytes)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save image file"})
 		return
