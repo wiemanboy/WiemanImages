@@ -49,6 +49,21 @@ func TestFileService_GetFile_returnsImage(t *testing.T) {
 	}
 }
 
+func TestFileService_CreateFile(t *testing.T) {
+	var fileRepo data.MockFileRepository
+	fileService := NewFileService(&fileRepo)
+
+	objectKey := "test"
+	fileContent := []byte("file content")
+
+	fileRepo.On("SaveFile", objectKey, fileContent).Return(nil)
+
+	err := fileService.CreateFile(objectKey, fileContent)
+
+	fileRepo.AssertCalled(t, "SaveFile", objectKey, fileContent)
+	assert.Nil(t, err)
+}
+
 func getImageBytes(t *testing.T) []byte {
 	imageBytes, err := os.ReadFile("../../dev/test.png")
 	if err != nil {
