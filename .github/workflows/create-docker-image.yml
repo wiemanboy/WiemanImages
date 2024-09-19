@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - release/*
 
 jobs:
   build:
@@ -27,4 +28,14 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:latest
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:${{ vars.NEXT_VERSION }}
+            ${{ github.ref == 'refs/heads/master' && format('{0}/{1}:latest', secrets.DOCKER_HUB_USERNAME, vars.DOCKER_IMAGE_NAME) || '' }}
+
+      - name: Create release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: ${{ vars.NEXT_VERSION }}
+          prerelease: false
+          title: "${{ github.event.repository.name }} v${{ vars.NEXT_VERSION }}"
