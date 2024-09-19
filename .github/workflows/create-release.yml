@@ -1,0 +1,20 @@
+name: Create release
+
+on:
+  push:
+    branches:
+      - master
+      - release/*
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.TOKEN }}"
+          automatic_release_tag: ${{ vars.NEXT_VERSION }}
+          prerelease: false
+          title: "${{ github.event.repository.name }} v${{ vars.NEXT_VERSION }}"
