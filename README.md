@@ -18,3 +18,6 @@ docker pull vektra/mockery
 ```shell
 docker run -v ${PWD}:/src -w /src vektra/mockery --all
 ```
+
+
+test
