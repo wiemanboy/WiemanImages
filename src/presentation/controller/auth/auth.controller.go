@@ -2,71 +2,52 @@ package auth
 
 import (
 	"WiemanImages/src/service"
+	"crypto/rand"
+	"encoding/base64"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type AuthController struct {
-	authService      service.AuthService
-	cookieExpiration int
+	authService service.AuthService
 }
 
-func NewController(authService service.AuthService, cookieExpiration int) *AuthController {
+func NewController(authService service.AuthService) *AuthController {
 	return &AuthController{
-		authService:      authService,
-		cookieExpiration: cookieExpiration,
+		authService: authService,
 	}
 }
 
 func (controller *AuthController) Login(context *gin.Context) {
-	type RequestBody struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
-	var body RequestBody
-	if err := context.BindJSON(&body); err != nil {
-		context.AbortWithStatus(400)
-		return
-	}
-
-	token, err := controller.authService.Login(body.Username, body.Password)
-
+	state, err := generateRandomState()
 	if err != nil {
-		context.JSON(401, gin.H{
-			"error": "invalid credentials",
-		})
+		context.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	context.SetCookie("token", token, controller.cookieExpiration, "/", "", true, true)
+	// Save the state inside the session.
+	session := sessions.Default(context)
+	session.Set("state", state)
+	if err := session.Save(); err != nil {
+		context.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	context.JSON(200, gin.H{
-		"token": token,
-	})
+	context.Redirect(http.StatusTemporaryRedirect, controller.authService.AuthCodeURL(state))
 }
 
 func (controller *AuthController) Refresh(context *gin.Context) {
+}
 
-	cookieToken, err := context.Request.Cookie("token")
-
+func generateRandomState() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
 	if err != nil {
-		context.JSON(400, gin.H{
-			"error": "no token provided, please login first",
-		})
-		return
+		return "", err
 	}
 
-	token, err := controller.authService.Refresh(cookieToken.Value)
+	state := base64.StdEncoding.EncodeToString(b)
 
-	if err != nil {
-		context.JSON(200, gin.H{
-			"token": nil,
-		})
-		return
-	}
-
-	context.SetCookie("token", token, controller.cookieExpiration, "/", "", true, true)
-	context.JSON(200, gin.H{
-		"token": token,
-	})
+	return state, nil
 }

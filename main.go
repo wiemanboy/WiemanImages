@@ -9,6 +9,8 @@ import (
 	"WiemanImages/src/presentation/middleware"
 	"WiemanImages/src/s3"
 	"WiemanImages/src/service"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -23,8 +25,8 @@ func main() {
 
 	s3Client := s3.NewS3Client(&appConfig.Region, &appConfig.S3Endpoint, appConfig.AccessKeyID, appConfig.SecretAccessKey)
 
-	authService := service.NewAuthService(appConfig.JWTSecret, appConfig.JWTExpirationTime, appConfig.AdminUsername, appConfig.AdminPassword)
-	authController := auth.NewController(authService, appConfig.JWTExpirationTime)
+	authService := service.NewAuthService()
+	authController := auth.NewController(authService)
 	authMiddleware := middleware.NewAuthorizedMiddleware(&authService)
 
 	fileRepository := data.NewS3Repository(s3Client, appConfig.BucketName)
@@ -32,6 +34,10 @@ func main() {
 	fileController := files.NewFileController(fileService)
 
 	app := gin.Default()
+
+	store := cookie.NewStore([]byte("secret"))
+	app.Use(sessions.Sessions("auth-session", store))
+
 	presentation.ApplyRoutes(app, fileController, authController, authMiddleware)
 	app.Run(":" + appConfig.Port)
 }

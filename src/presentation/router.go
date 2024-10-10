@@ -14,10 +14,16 @@ func ping(context *gin.Context) {
 }
 
 func ApplyRoutes(router *gin.Engine, fileController *files.FileController, authController *auth.AuthController, authMiddleware *middleware.AuthorizedMiddleware) {
+
+	services := router.Group("/services/files")
+	{
+		services.GET("/ping", ping)
+		services.GET("/docs", ping)
+		auth.ApplyRoutes(services, authController)
+	}
+
 	api := router.Group("/api")
 	{
-		api.GET("/ping", ping)
 		files.ApplyRoutes(api, fileController, authMiddleware)
-		auth.ApplyRoutes(api, authController)
 	}
 }

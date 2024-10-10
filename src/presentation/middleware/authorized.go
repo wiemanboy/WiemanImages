@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"WiemanImages/src/service"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type AuthorizedMiddleware struct {
@@ -14,13 +16,9 @@ func NewAuthorizedMiddleware(authService *service.AuthService) *AuthorizedMiddle
 }
 
 func (middleware *AuthorizedMiddleware) Check(context *gin.Context) {
-	cookieToken, err := context.Request.Cookie("token")
-
-	if err != nil || !middleware.authService.Check(cookieToken.Value) {
-		context.JSON(401, gin.H{
-			"error": "invalid token, please login again",
-		})
-		context.Abort()
+	if sessions.Default(context).Get("profile") == nil {
+		context.Redirect(http.StatusSeeOther, "/services/files/auth/login")
+		context.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
