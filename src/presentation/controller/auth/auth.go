@@ -9,6 +9,6 @@ func ApplyRoutes(r *gin.RouterGroup, controller *AuthController) {
 	auth := r.Group("/auth")
 	{
 		auth.GET("/login", controller.Login)
-		auth.GET("/refresh", controller.Refresh)
+		auth.GET("/callback", controller.Callback)
 	}
 }

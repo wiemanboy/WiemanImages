@@ -9,6 +9,7 @@ import (
 	"WiemanImages/src/presentation/middleware"
 	"WiemanImages/src/s3"
 	"WiemanImages/src/service"
+	"encoding/gob"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -25,7 +26,7 @@ func main() {
 
 	s3Client := s3.NewS3Client(&appConfig.Region, &appConfig.S3Endpoint, appConfig.AccessKeyID, appConfig.SecretAccessKey)
 
-	authService := service.NewAuthService()
+	authService := service.NewAuthService(appConfig.Auth0Domain, appConfig.Auth0ClientId, appConfig.Auth0ClientSecret, appConfig.Auth0CallbackUrl)
 	authController := auth.NewController(authService)
 	authMiddleware := middleware.NewAuthorizedMiddleware(&authService)
 
@@ -35,6 +36,7 @@ func main() {
 
 	app := gin.Default()
 
+	gob.Register(map[string]interface{}{})
 	store := cookie.NewStore([]byte("secret"))
 	app.Use(sessions.Sessions("auth-session", store))
 

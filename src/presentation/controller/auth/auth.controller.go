@@ -37,7 +37,41 @@ func (controller *AuthController) Login(context *gin.Context) {
 	context.Redirect(http.StatusTemporaryRedirect, controller.authService.AuthCodeURL(state))
 }
 
-func (controller *AuthController) Refresh(context *gin.Context) {
+func (controller *AuthController) Callback(context *gin.Context) {
+	session := sessions.Default(context)
+	if context.Query("state") != session.Get("state") {
+		context.String(http.StatusBadRequest, "Invalid state parameter.")
+		return
+	}
+
+	// Exchange an authorization code for a token.
+	token, err := controller.authService.Exchange(context.Request.Context(), context.Query("code"))
+	if err != nil {
+		context.String(http.StatusUnauthorized, "Failed to exchange an authorization code for a token.")
+		return
+	}
+
+	idToken, err := controller.authService.VerifyIDToken(context.Request.Context(), token)
+	if err != nil {
+		context.String(http.StatusInternalServerError, "Failed to verify ID Token.")
+		return
+	}
+
+	var profile map[string]interface{}
+	if err := idToken.Claims(&profile); err != nil {
+		context.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	session.Set("access_token", token.AccessToken)
+	session.Set("profile", profile)
+	if err := session.Save(); err != nil {
+		context.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Redirect to docs page.
+	context.Redirect(http.StatusTemporaryRedirect, "/services/files/docs")
 }
 
 func generateRandomState() (string, error) {

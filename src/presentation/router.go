@@ -25,5 +25,6 @@ func ApplyRoutes(router *gin.Engine, fileController *files.FileController, authC
 	api := router.Group("/api")
 	{
 		files.ApplyRoutes(api, fileController, authMiddleware)
+		api.GET("/ping", authMiddleware.Check, ping)
 	}
 }
