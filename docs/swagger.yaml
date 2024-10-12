@@ -1,0 +1,129 @@
+definitions:
+  auth.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  files.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  files.FileCreateResponse:
+    properties:
+      fileKey:
+        type: string
+      fileName:
+        type: string
+    type: object
+  files.FileListResponse:
+    properties:
+      files:
+        items:
+          type: string
+        type: array
+    type: object
+  presentation.PingResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the Wieman Images service API.
+  title: Wieman Images API
+paths:
+  /api/files/:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a file in the storage
+      parameters:
+      - description: Image file to upload
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Key for the file
+        in: formData
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: File successfully uploaded
+          schema:
+            $ref: '#/definitions/files.FileCreateResponse'
+        "400":
+          description: Failed to save image file please try again
+          schema:
+            $ref: '#/definitions/files.ErrorResponse'
+      summary: Create file
+      tags:
+      - Files
+  /api/files/{key}:
+    get:
+      description: Fetches a file from the storage if it is an image it will be scaled
+        to the requested size
+      parameters:
+      - description: File key
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "200":
+          description: List of files
+          schema:
+            $ref: '#/definitions/files.FileListResponse'
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/files.ErrorResponse'
+      summary: Fetch file
+      tags:
+      - Files
+  /services/files/auth/callback:
+    get:
+      description: Callback for Auth0 browser authentication
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Failed to exchange an authorization code for a token
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+        "500":
+          description: Failed to verify ID Token
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+      summary: Callback
+      tags:
+      - Auth
+  /services/files/auth/login:
+    get:
+      description: Redirects to Auth0 login page for browser authentication
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Failed to save session
+          schema:
+            $ref: '#/definitions/auth.ErrorResponse'
+      summary: Redirects to Auth0 login page
+      tags:
+      - Auth
+  /services/files/ping:
+    get:
+      description: Health check endpoint
+      responses:
+        "200":
+          description: pong
+          schema:
+            $ref: '#/definitions/presentation.PingResponse'
+      summary: Ping
+      tags:
+      - Services
+swagger: "2.0"

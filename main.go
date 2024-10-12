@@ -2,6 +2,7 @@ package main
 
 import (
 	"WiemanImages/config"
+	_ "WiemanImages/docs"
 	"WiemanImages/src/client"
 	"WiemanImages/src/data"
 	"WiemanImages/src/presentation"
@@ -16,6 +17,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
+//go:generate swag init
+
+// @title Wieman Images API
+// @description This is the Wieman Images service API.
 func main() {
 	exception := godotenv.Load()
 	if exception != nil {

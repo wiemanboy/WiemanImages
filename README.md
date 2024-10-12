@@ -6,6 +6,10 @@ It is written in [Go](https://go.dev/) using the [Gin framework](https://gin-gon
 
 I have used [this project](https://github.com/velopert/gin-rest-api-sample) as a template to build off
 
+Swagger documentation is available at `/services/files/docs/index.html`.
+
+These are generated using `swag init` or `go generate`, please add `go generate` to your build process.
+
 ## Testing
 
 ### Mocking
