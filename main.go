@@ -2,12 +2,12 @@ package main
 
 import (
 	"WiemanImages/config"
+	"WiemanImages/src/client"
 	"WiemanImages/src/data"
 	"WiemanImages/src/presentation"
 	"WiemanImages/src/presentation/controller/auth"
 	"WiemanImages/src/presentation/controller/files"
 	"WiemanImages/src/presentation/middleware"
-	"WiemanImages/src/s3"
 	"WiemanImages/src/service"
 	"encoding/gob"
 	"github.com/gin-contrib/sessions"
@@ -24,9 +24,10 @@ func main() {
 
 	appConfig := config.LoadConfig()
 
-	s3Client := s3.NewS3Client(&appConfig.Region, &appConfig.S3Endpoint, appConfig.AccessKeyID, appConfig.SecretAccessKey)
+	auth0Client := client.NewAuth0Client("https://" + appConfig.Auth0Domain)
+	s3Client := client.NewS3Client(&appConfig.Region, &appConfig.S3Endpoint, appConfig.AccessKeyID, appConfig.SecretAccessKey)
 
-	authService := service.NewAuthService(appConfig.Auth0Domain, appConfig.Auth0ClientId, appConfig.Auth0ClientSecret, appConfig.Auth0CallbackUrl)
+	authService := service.NewAuthService(*auth0Client, appConfig.Auth0Domain, appConfig.Auth0ClientId, appConfig.Auth0ClientSecret, appConfig.Auth0CallbackUrl)
 	authController := auth.NewController(authService)
 	authMiddleware := middleware.NewAuthorizedMiddleware(&authService)
 
@@ -41,5 +42,5 @@ func main() {
 	app.Use(sessions.Sessions("auth-session", store))
 
 	presentation.ApplyRoutes(app, fileController, authController, authMiddleware)
-	app.Run(":" + appConfig.Port)
+	_ = app.Run(":" + appConfig.Port)
 }

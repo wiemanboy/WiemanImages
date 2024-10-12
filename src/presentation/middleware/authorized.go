@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 type AuthorizedMiddleware struct {
@@ -16,11 +17,18 @@ func NewAuthorizedMiddleware(authService *service.AuthService) *AuthorizedMiddle
 }
 
 func (middleware *AuthorizedMiddleware) Check(context *gin.Context) {
-	if sessions.Default(context).Get("profile") == nil {
-		context.Redirect(http.StatusSeeOther, "/services/files/auth/login")
-		context.AbortWithStatus(http.StatusUnauthorized)
+	token := context.GetHeader("Authorization")
+
+	if middleware.authService.CheckJwt(strings.TrimPrefix(token, "Bearer ")) {
+		context.Next()
 		return
 	}
 
-	context.Next()
+	if sessions.Default(context).Get("profile") != nil {
+		context.Next()
+		return
+	}
+
+	context.Redirect(http.StatusSeeOther, "/services/files/auth/login")
+	context.AbortWithStatus(http.StatusUnauthorized)
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"WiemanImages/src/client"
 	"context"
 	"errors"
 	"fmt"
@@ -9,11 +10,12 @@ import (
 )
 
 type AuthService struct {
+	auth0Client client.Auth0Client
 	*oidc.Provider
 	oauth2.Config
 }
 
-func NewAuthService(auth0Domain string, auth0ClientId string, auth0ClientSecret string, auth0CallbackUrl string) AuthService {
+func NewAuthService(auth0Client client.Auth0Client, auth0Domain string, auth0ClientId string, auth0ClientSecret string, auth0CallbackUrl string) AuthService {
 	provider, err := oidc.NewProvider(
 		context.Background(),
 		"https://"+auth0Domain+"/",
@@ -30,21 +32,27 @@ func NewAuthService(auth0Domain string, auth0ClientId string, auth0ClientSecret 
 	}
 
 	return AuthService{
-		Provider: provider,
-		Config:   conf,
+		auth0Client: auth0Client,
+		Provider:    provider,
+		Config:      conf,
 	}
 }
 
 // VerifyIDToken verifies that an *oauth2.Token is a valid *oidc.IDToken.
-func (a *AuthService) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
+func (service *AuthService) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("no id_token field in oauth2 token")
 	}
 
 	oidcConfig := &oidc.Config{
-		ClientID: a.ClientID,
+		ClientID: service.ClientID,
 	}
 
-	return a.Verifier(oidcConfig).Verify(ctx, rawIDToken)
+	return service.Verifier(oidcConfig).Verify(ctx, rawIDToken)
+}
+
+func (service *AuthService) CheckJwt(token string) bool {
+	_, err := service.auth0Client.ValidateToken(token)
+	return err == nil
 }
