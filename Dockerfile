@@ -8,9 +8,7 @@ RUN go mod download
 COPY ./main.go ./
 COPY ./config ./config
 COPY ./src ./src
-COPY ./dev/test.png ./dev/test.png
-COPY ./mocks ./mocks
-RUN go test ./src/...
+COPY ./docs ./docs
 RUN CGO_ENABLED=0 GOOS=linux go build -o /build
 
 FROM golang:alpine
