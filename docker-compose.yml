@@ -5,8 +5,8 @@ services:
       MINIO_ROOT_USER: "username"
       MINIO_ROOT_PASSWORD: "password"
     ports:
-      - 9000:9000
-      - 9001:9001
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - ./dev/minio/data:/data
     command: server /data --console-address ":9001"
@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
+      - "8000:8000"
     environment:
       S3_ENDPOINT: "http://blobstore:9000"
       ACCESS_KEY_ID: "username"
@@ -27,3 +27,7 @@ services:
       JWT_EXPIRATION_TIME: "1000000"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "admin"
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      AUTH0_CALLBACK_URL: ${AUTH0_CALLBACK_URL}

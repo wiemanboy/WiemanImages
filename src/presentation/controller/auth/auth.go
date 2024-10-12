@@ -8,7 +8,7 @@ import (
 func ApplyRoutes(r *gin.RouterGroup, controller *AuthController) {
 	auth := r.Group("/auth")
 	{
-		auth.POST("/login", controller.Login)
-		auth.POST("/refresh", controller.Refresh)
+		auth.GET("/login", controller.Login)
+		auth.GET("/callback", controller.Callback)
 	}
 }

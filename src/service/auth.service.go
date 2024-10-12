@@ -1,69 +1,58 @@
 package service
 
 import (
+	"WiemanImages/src/client"
+	"context"
 	"errors"
-	"github.com/golang-jwt/jwt/v5"
-	"time"
+	"fmt"
+	"github.com/coreos/go-oidc/v3/oidc"
+	"golang.org/x/oauth2"
 )
 
 type AuthService struct {
-	jwtSecret     string
-	jwtExpiration int
-	adminUsername string
-	adminPassword string
+	auth0Client client.Auth0Client
+	*oidc.Provider
+	oauth2.Config
 }
 
-func NewAuthService(jwtSecret string, jwtExpiration int, adminUsername string, adminPassword string) AuthService {
+func NewAuthService(auth0Client client.Auth0Client, auth0Domain string, auth0ClientId string, auth0ClientSecret string, auth0CallbackUrl string) AuthService {
+	provider, err := oidc.NewProvider(
+		context.Background(),
+		"https://"+auth0Domain+"/",
+	)
+
+	fmt.Println(err)
+
+	conf := oauth2.Config{
+		ClientID:     auth0ClientId,
+		ClientSecret: auth0ClientSecret,
+		RedirectURL:  auth0CallbackUrl,
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile"},
+	}
+
 	return AuthService{
-		jwtSecret:     jwtSecret,
-		jwtExpiration: jwtExpiration,
-		adminUsername: adminUsername,
-		adminPassword: adminPassword,
+		auth0Client: auth0Client,
+		Provider:    provider,
+		Config:      conf,
 	}
 }
 
-func (service *AuthService) Login(username string, password string) (string, error) {
-	if username != service.adminUsername || password != service.adminPassword {
-		return "", errors.New("invalid credentials")
+// VerifyIDToken verifies that an *oauth2.Token is a valid *oidc.IDToken.
+func (service *AuthService) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
+	rawIDToken, ok := token.Extra("id_token").(string)
+	if !ok {
+		return nil, errors.New("no id_token field in oauth2 token")
 	}
 
-	return generateToken(service.jwtSecret, service.jwtExpiration)
-}
-
-func (service *AuthService) Refresh(token string) (string, error) {
-	if !checkToken(token, service.jwtSecret) {
-		return "", errors.New("invalid token")
+	oidcConfig := &oidc.Config{
+		ClientID: service.ClientID,
 	}
 
-	return generateToken(service.jwtSecret, service.jwtExpiration)
+	return service.Verifier(oidcConfig).Verify(ctx, rawIDToken)
 }
 
-func (service *AuthService) Check(token string) bool {
-	return checkToken(token, service.jwtSecret)
-}
-
-func checkToken(token string, secret string) bool {
-	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-
-	if err != nil {
-		return false
-	}
-
-	expiration := int64(claims["expires"].(float64))
-	now := time.Now().Unix()
-	return now < expiration
-}
-
-func generateToken(secret string, expiration int) (string, error) {
-	date := time.Now().Add(time.Millisecond * time.Duration(expiration))
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"expires": date.Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(secret))
-	return tokenString, err
+func (service *AuthService) CheckJwt(token string) bool {
+	_, err := service.auth0Client.ValidateToken(token)
+	return err == nil
 }

@@ -1,4 +1,4 @@
-package s3
+package client
 
 import (
 	"github.com/aws/aws-sdk-go/aws"

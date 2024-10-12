@@ -12,10 +12,10 @@ type Config struct {
 	BucketName        string
 	Region            string
 	Port              string
-	JWTSecret         string
-	JWTExpirationTime int
-	AdminUsername     string
-	AdminPassword     string
+	Auth0Domain       string
+	Auth0ClientId     string
+	Auth0ClientSecret string
+	Auth0CallbackUrl  string
 }
 
 func LoadConfig() *Config {
@@ -26,10 +26,10 @@ func LoadConfig() *Config {
 		BucketName:        os.Getenv("BUCKET_NAME"),
 		Region:            os.Getenv("REGION"),
 		Port:              os.Getenv("PORT"),
-		JWTSecret:         os.Getenv("JWT_SECRET"),
-		JWTExpirationTime: toInt(os.Getenv("JWT_EXPIRATION_TIME")),
-		AdminUsername:     os.Getenv("ADMIN_USERNAME"),
-		AdminPassword:     os.Getenv("ADMIN_PASSWORD"),
+		Auth0Domain:       os.Getenv("AUTH0_DOMAIN"),
+		Auth0ClientId:     os.Getenv("AUTH0_CLIENT_ID"),
+		Auth0ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
+		Auth0CallbackUrl:  os.Getenv("AUTH0_CALLBACK_URL"),
 	}
 }
 
