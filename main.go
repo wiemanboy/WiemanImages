@@ -11,6 +11,7 @@ import (
 	"WiemanImages/src/presentation/middleware"
 	"WiemanImages/src/service"
 	"encoding/gob"
+	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -19,9 +20,14 @@ import (
 
 //go:generate swag init
 
+var appVersion string
+var appName string
+
 // @title Wieman Images API
 // @description This is the Wieman Images service API.
 func main() {
+	fmt.Printf("Starting %s v%s\n", appName, appVersion)
+
 	exception := godotenv.Load()
 	if exception != nil {
 		print("Failed loading from .env file")
