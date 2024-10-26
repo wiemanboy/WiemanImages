@@ -60,5 +60,5 @@ jobs:
             if [[ -n "$existing_reviews" ]]; then
               echo "A similar review already exists. Skipping the review request."
             else
-              gh pr review ${{ github.event.pull_request.number }} --request-changes --body "Version ${{ env.VERSION }} already exists; this will overwrite the existing release. If this is a mistake, please bump the version in package.json."
+              gh pr review ${{ github.event.pull_request.number }} --request-changes --body "Version `${{ env.VERSION }}` already exists; this will overwrite the existing release. If this is a mistake, please bump the version in the `Makefile`."
             fi
