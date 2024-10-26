@@ -1,4 +1,4 @@
-name: Run tests
+name: Test
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ jobs:
             go-version: '1.23.1'
 
         - name: Run tests
-          run: go test ./...
+          run: make test
 
         - name: Build Docker image
           run: docker build -t wiemanimages .

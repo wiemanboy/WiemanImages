@@ -5,15 +5,12 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY ./main.go ./
-COPY ./config ./config
-COPY ./src ./src
-COPY ./docs ./docs
-RUN CGO_ENABLED=0 GOOS=linux go build -o /build
+COPY . .
+RUN make build:linux
 
 FROM golang:alpine
 
-COPY --from=builder /build /build
+COPY --from=builder /app/build /build
 COPY read_secrets.sh /read_secrets.sh
 RUN chmod +x /read_secrets.sh
 
