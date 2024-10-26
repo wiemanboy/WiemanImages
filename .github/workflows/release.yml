@@ -60,6 +60,8 @@ jobs:
         run: |
           existing_release=$(gh release view "${{ env.VERSION }}" --json id --jq '.id // empty')
           
+          echo $existing_release
+          
           if [[ -n "$existing_release" && "$existing_release" != "release not found" ]]; then
             echo "Deleting existing release for version ${{ env.VERSION }}"
             gh release delete "${{ env.VERSION }}" --yes --repo ${{ github.repository }}
