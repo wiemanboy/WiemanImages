@@ -44,26 +44,14 @@ jobs:
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:${{ env.VERSION }}
             ${{ github.ref == 'refs/heads/master' && format('{0}/{1}:latest', secrets.DOCKER_HUB_USERNAME, vars.DOCKER_IMAGE_NAME) || '' }}
 
-      - name: Draft release
-        uses: release-drafter/release-drafter@v6
+      - name: Create release
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.event.repository.name }} v${{ env.VERSION }}
-          tag: ${{ env.VERSION }}
-          header: |
+          tag_name: ${{ env.VERSION }}
+          body: |
             [> DockerHub](https://hub.docker.com/r/${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}/tags?name=${{ env.VERSION }})
             
             ```bash
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ vars.DOCKER_IMAGE_NAME }}:${{ env.VERSION }}
-            ```  
-
-      - name: Publish Draft
-        run: |
-          existing_release=$(gh release view "${{ env.VERSION }}" --json isDraft --jq '.isDraft // empty')
-                    
-          if [[ -n "$existing_release" && $existing_release == "false" ]]; then
-            echo "Deleting existing release for version ${{ env.VERSION }}"
-            gh release delete "${{ env.VERSION }}" --yes --repo ${{ github.repository }}
-          fi
-          
-          echo "Publishing new release for version ${{ env.VERSION }}"
-          gh release edit "${{ env.VERSION }}" --draft=false --repo ${{ github.repository }}
+            ```

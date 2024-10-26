@@ -39,7 +39,7 @@ jobs:
           run: echo "GH_TOKEN=${{steps.app-token.outputs.token}}" >> $GITHUB_ENV
 
         - name: Get version
-          run: echo "VERSION=%(make version)" >> $GITHUB_ENV
+          run: echo "VERSION=$(make version)" >> $GITHUB_ENV
 
         - name: Check Tag
           run: |
@@ -55,7 +55,7 @@ jobs:
         - name: Block PR
           if: env.BLOCK_PR == 'true'
           run: |
-            existing_reviews=$(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews[] | select(.body | contains("Version ${{ env.VERSION }} already exists"))')
+            existing_reviews=$(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews[] | select(.body | contains("Version `${{ env.VERSION }}` already exists"))')
 
             if [[ -n "$existing_reviews" ]]; then
               echo "A similar review already exists. Skipping the review request."
